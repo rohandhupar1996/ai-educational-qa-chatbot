@@ -1,0 +1,13 @@
+# Virtual environments
+ai_qa_bot/
+venv*/
+__pycache__/
+*.pyc
+.env
+outputs/
+logs/
+.ptgit 
+models/
+git status
+saved_models/
+*.pt

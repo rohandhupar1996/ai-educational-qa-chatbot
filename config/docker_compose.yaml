@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  ai-edu-qa-bot:
+    build: .
+    container_name: ai_edu_qa_bot_openai
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DEFAULT_OPENAI_MODEL=${DEFAULT_OPENAI_MODEL:-gpt-3.5-turbo}
+      - ENVIRONMENT=production
+      - LOG_LEVEL=info
+      - USE_GPU=false
+      - DEFAULT_TTS_MODEL=gtts
+    volumes:
+      - ./outputs:/app/outputs
+      - ./logs:/app/logs
+      - ./models:/app/models
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-bot-network
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: ai_edu_qa_bot_redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   restart: unless-stopped
+  #   networks:
+  #     - ai-bot-network
+
+  # Optional: Nginx reverse proxy (uncomment if needed)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: ai_edu_qa_bot_nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - ai-edu-qa-bot
+  #   restart: unless-stopped
+  #   networks:
+  #     - ai-bot-network
+
+volumes:
+  # redis_data:
+  outputs:
+  logs:
+  models:
+
+networks:
+  ai-bot-network:
+    driver: bridge
